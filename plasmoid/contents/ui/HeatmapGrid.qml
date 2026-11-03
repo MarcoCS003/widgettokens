@@ -17,7 +17,7 @@ Item {
 
     readonly property bool isDark: Kirigami.Theme.backgroundColor.r < 0.5
 
-    // Blue Heatmap Palette
+    // Blue Heatmap Palette (0 to 5)
     function getCellColor(intensity) {
         if (isDark) {
             switch (intensity) {
@@ -25,6 +25,7 @@ Item {
                 case 2: return "#1158c7";
                 case 3: return "#1f6feb";
                 case 4: return "#58a6ff";
+                case 5: return "#79e2fb"; // Icy neon cyan (>100M tokens)
                 default: return "#161b22";
             }
         } else {
@@ -33,6 +34,7 @@ Item {
                 case 2: return "#54aeff";
                 case 3: return "#0969da";
                 case 4: return "#0550ae";
+                case 5: return "#033d8b"; // Deepest navy (>100M tokens)
                 default: return "#ebedf0";
             }
         }
@@ -40,8 +42,10 @@ Item {
 
     function getBorderColor(intensity) {
         if (isDark) {
+            if (intensity === 5) return "#b8f4fd";
             return intensity > 0 ? Qt.lighter(getCellColor(intensity), 1.25) : "#262c36";
         } else {
+            if (intensity === 5) return "#002159";
             return intensity > 0 ? Qt.darker(getCellColor(intensity), 1.1) : "#d0d7de";
         }
     }

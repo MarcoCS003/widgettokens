@@ -218,21 +218,26 @@ def get_aggregated_matrix(
 
     all_days = list(day_map.values())
 
-    # Calculate quartiles for intensity scaling (0: none, 1: low, 2: medium, 3: high, 4: very high)
+    # Calculate quartiles for intensity scaling (0: none, 1: low, 2: medium, 3: high, 4: very high, 5: epic >100M)
     active_totals = [d["total_tokens"] for d in all_days if d["total_tokens"] > 0]
     active_totals.sort()
 
+    below_100m = [t for t in active_totals if t < 100_000_000]
+    q_pool = below_100m if below_100m else active_totals
+
     q1, q2, q3 = 0, 0, 0
-    if active_totals:
-        n = len(active_totals)
-        q1 = active_totals[n // 4]
-        q2 = active_totals[n // 2]
-        q3 = active_totals[(3 * n) // 4]
+    if q_pool:
+        n = len(q_pool)
+        q1 = q_pool[n // 4]
+        q2 = q_pool[n // 2]
+        q3 = q_pool[(3 * n) // 4]
 
     for d in all_days:
         tot = d["total_tokens"]
         if tot == 0:
             d["intensity"] = 0
+        elif tot >= 100_000_000:
+            d["intensity"] = 5
         elif tot <= q1 or q1 == q2:
             d["intensity"] = 1
         elif tot <= q2 or q2 == q3:
@@ -257,7 +262,8 @@ def get_aggregated_matrix(
         "quantiles": {
             "q1": q1,
             "q2": q2,
-            "q3": q3
+            "q3": q3,
+            "threshold_epic": 100000000
         }
     }
 

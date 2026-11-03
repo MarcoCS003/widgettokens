@@ -15,6 +15,32 @@ Item {
 
     readonly property color borderColor: Qt.rgba(Kirigami.Theme.textColor.r, Kirigami.Theme.textColor.g, Kirigami.Theme.textColor.b, 0.18)
 
+    function getLegendTooltipText(level) {
+        var summary = (plasmoidItem && plasmoidItem.historyData && plasmoidItem.historyData.summary) ?
+                      plasmoidItem.historyData.summary : {};
+        var q = summary.quantiles || {};
+        var q1Str = plasmoidItem ? plasmoidItem.formatTokens(q.q1 || 1738530) : "1.74 M";
+        var q2Str = plasmoidItem ? plasmoidItem.formatTokens(q.q2 || 9585273) : "9.59 M";
+        var q3Str = plasmoidItem ? plasmoidItem.formatTokens(q.q3 || 24189044) : "24.19 M";
+
+        switch (level) {
+            case 0:
+                return "Nivel 0: 0 tokens (Sin actividad)";
+            case 1:
+                return "Nivel 1 (Bajo): 1 — " + q1Str;
+            case 2:
+                return "Nivel 2 (Moderado): " + q1Str + " — " + q2Str;
+            case 3:
+                return "Nivel 3 (Alto): " + q2Str + " — " + q3Str;
+            case 4:
+                return "Nivel 4 (Muy alto): " + q3Str + " — 100 M";
+            case 5:
+                return "Nivel 5 (Épico): > 100 M tokens";
+            default:
+                return "";
+        }
+    }
+
     ColumnLayout {
         anchors.fill: parent
         anchors.margins: Kirigami.Units.smallSpacing * 1.5
@@ -169,14 +195,28 @@ Item {
                 }
 
                 Repeater {
-                    model: [0, 1, 2, 3, 4]
+                    model: [0, 1, 2, 3, 4, 5]
                     Rectangle {
+                        id: legendCell
                         width: 10
                         height: 10
                         radius: 2
                         color: heatmap.getCellColor(modelData)
                         border.width: 1
                         border.color: heatmap.getBorderColor(modelData)
+
+                        MouseArea {
+                            id: legendArea
+                            anchors.fill: parent
+                            hoverEnabled: true
+
+                            QQC2.ToolTip {
+                                visible: legendArea.containsMouse
+                                delay: 80
+                                timeout: 8000
+                                text: fullRoot.getLegendTooltipText(modelData)
+                            }
+                        }
                     }
                 }
 
