@@ -36,6 +36,7 @@ Thumbs.db
 *.db-shm
 .cache/
 history.json
+*.plasmoid
 
 # Local AI configs & Agent workflows
 AGENTS.md
