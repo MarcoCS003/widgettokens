@@ -40,7 +40,7 @@ PlasmoidItem {
         if (historyData && historyData.summary && historyData.summary.range_start) {
             return historyData.summary.range_start + " — " + historyData.summary.range_end;
         }
-        return "Últimos 6 meses";
+        return "Últimos 7 meses";
     }
 
     function formatTokens(count) {

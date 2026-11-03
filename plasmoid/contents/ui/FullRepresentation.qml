@@ -8,10 +8,10 @@ Item {
 
     required property var plasmoidItem
 
-    Layout.minimumWidth: 350
-    Layout.minimumHeight: 210
-    Layout.preferredWidth: 420
-    Layout.preferredHeight: 240
+    Layout.minimumWidth: 420
+    Layout.minimumHeight: 220
+    Layout.preferredWidth: 540
+    Layout.preferredHeight: 250
 
     readonly property color borderColor: Qt.rgba(Kirigami.Theme.textColor.r, Kirigami.Theme.textColor.g, Kirigami.Theme.textColor.b, 0.18)
 
@@ -63,7 +63,7 @@ Item {
             }
         }
 
-        // --- Metric Cards (Compact: 2 Cards Adaptable) ---
+        // --- Top Metric Cards: 2 Sleek Cards ---
         RowLayout {
             Layout.fillWidth: true
             spacing: Kirigami.Units.smallSpacing
@@ -71,64 +71,63 @@ Item {
             // Card 1: Hoy
             Rectangle {
                 Layout.fillWidth: true
-                height: 48
+                height: 42
                 radius: 4
                 color: Kirigami.Theme.alternateBackgroundColor
                 border.width: 1
                 border.color: fullRoot.borderColor
 
-                ColumnLayout {
+                RowLayout {
                     anchors.centerIn: parent
-                    spacing: 1
+                    spacing: Kirigami.Units.smallSpacing
+
                     QQC2.Label {
-                        text: "Hoy"
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.75
+                        text: "Hoy:"
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.85
                         color: Kirigami.Theme.disabledTextColor
-                        Layout.alignment: Qt.AlignHCenter
                     }
                     QQC2.Label {
                         text: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.formatTokens(fullRoot.plasmoidItem.todayTokens) : "0"
                         font.bold: true
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.05
                         color: fullRoot.plasmoidItem && fullRoot.plasmoidItem.todayTokens > 0 ? "#58a6ff" : Kirigami.Theme.disabledTextColor
-                        Layout.alignment: Qt.AlignHCenter
                     }
                 }
             }
 
-            // Card 2: Semestre (6 Meses)
+            // Card 2: Total 7 Meses
             Rectangle {
                 Layout.fillWidth: true
-                height: 48
+                height: 42
                 radius: 4
                 color: Kirigami.Theme.alternateBackgroundColor
                 border.width: 1
                 border.color: fullRoot.borderColor
 
-                ColumnLayout {
+                RowLayout {
                     anchors.centerIn: parent
-                    spacing: 1
+                    spacing: Kirigami.Units.smallSpacing
+
                     QQC2.Label {
-                        text: "Últimos 6 Meses"
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.75
+                        text: "Total (7 Meses):"
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.85
                         color: Kirigami.Theme.disabledTextColor
-                        Layout.alignment: Qt.AlignHCenter
                     }
                     QQC2.Label {
                         text: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.formatTokens(fullRoot.plasmoidItem.grandTotal) : "0"
                         font.bold: true
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.05
                         color: Kirigami.Theme.textColor
-                        Layout.alignment: Qt.AlignHCenter
                     }
                 }
             }
         }
 
-        // --- Heatmap Semi-Annual Matrix (~26 weeks x 7 days) ---
+        // --- HERO ELEMENT: Heatmap Matrix (7 Meses: ~30 semanas x 7 días) ---
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 102
+            Layout.fillHeight: true
+            Layout.preferredHeight: 128
             color: Kirigami.Theme.backgroundColor
             radius: 4
             border.width: 1
@@ -151,47 +150,20 @@ Item {
             }
         }
 
-        // --- Inspector / Details & Legend Bar ---
+        // --- Bottom Bar: Clean Legend Only (No redundant text) ---
         RowLayout {
             Layout.fillWidth: true
-            spacing: Kirigami.Units.smallSpacing
 
-            // Inspector of hovered day
-            QQC2.Label {
-                id: inspectorLabel
-                text: {
-                    var h = heatmap.hoveredDay;
-                    if (h) {
-                        var dt = h.date || "";
-                        var tot = h.total_tokens || 0;
-                        if (tot === 0) {
-                            return dt + "  •  Sin actividad";
-                        }
-                        var totStr = (fullRoot.plasmoidItem ? fullRoot.plasmoidItem.formatTokens(tot) : tot) + " tokens";
-                        var srcText = heatmap.getActiveSourcesText(h.by_source);
-
-                        var res = dt + "  •  " + totStr;
-                        if (srcText.length > 0) {
-                            res += "  [" + srcText + "]";
-                        }
-                        return res;
-                    }
-                    return "Pasa el cursor sobre una celda para ver el detalle.";
-                }
-                font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.78
-                color: heatmap.hoveredDay ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
-                Layout.fillWidth: true
-                elide: Text.ElideRight
-            }
+            Item { Layout.fillWidth: true }
 
             // Legend (Blue shades)
             Row {
-                spacing: 2
+                spacing: 3
                 Layout.alignment: Qt.AlignRight
 
                 QQC2.Label {
                     text: "Menos "
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.70
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.72
                     color: Kirigami.Theme.disabledTextColor
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -199,8 +171,8 @@ Item {
                 Repeater {
                     model: [0, 1, 2, 3, 4]
                     Rectangle {
-                        width: 9
-                        height: 9
+                        width: 10
+                        height: 10
                         radius: 2
                         color: heatmap.getCellColor(modelData)
                         border.width: 1
@@ -210,7 +182,7 @@ Item {
 
                 QQC2.Label {
                     text: " Más"
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.70
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.72
                     color: Kirigami.Theme.disabledTextColor
                     anchors.verticalCenter: parent.verticalCenter
                 }

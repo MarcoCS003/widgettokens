@@ -31,7 +31,7 @@ logger = logging.getLogger("widgettokens.collector")
 
 DEFAULT_CACHE_DIR = os.path.expanduser("~/.cache/plasma-tokens")
 DEFAULT_CACHE_PATH = os.path.join(DEFAULT_CACHE_DIR, "history.json")
-DEFAULT_DAYS = 182  # Medio año (~26 semanas)
+DEFAULT_DAYS = 210  # 7 meses (~30 semanas)
 
 
 def get_default_machine() -> str:
@@ -233,7 +233,7 @@ def update_local(
     """
     Full local standalone update cycle:
     1. Collects from all local tools.
-    2. Exports aggregated matrix (default 182 days) directly to history.json.
+    2. Exports aggregated matrix (default 210 days, 7 meses) directly to history.json.
     """
     mach = machine_name or get_default_machine()
     summary = collect_all(machine_name=mach, target_db_path=target_db_path)
@@ -250,7 +250,7 @@ if __name__ == "__main__":
     parser.add_argument("--machine", default=get_default_machine(), help="Machine name")
     parser.add_argument("--db", default=os.getenv("WIDGETTOKENS_DB", DEFAULT_DB_PATH), help="Target SQLite DB path")
     parser.add_argument("--cache", default=os.getenv("WIDGETTOKENS_CACHE", DEFAULT_CACHE_PATH), help="Plasmoid cache JSON path")
-    parser.add_argument("--days", type=int, default=int(os.getenv("WIDGETTOKENS_DAYS", str(DEFAULT_DAYS))), help="Days to aggregate (default: 182, medio año)")
+    parser.add_argument("--days", type=int, default=int(os.getenv("WIDGETTOKENS_DAYS", str(DEFAULT_DAYS))), help="Days to aggregate (default: 210, 7 meses)")
     parser.add_argument("--collect-only", action="store_true", help="Only run collectors without exporting history.json")
 
     args = parser.parse_args()

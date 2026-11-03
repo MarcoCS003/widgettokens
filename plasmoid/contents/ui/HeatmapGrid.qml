@@ -10,9 +10,9 @@ Item {
     property var daysList: []
     property var hoveredDay: null
 
-    // Cell sizing - compact GitHub style
-    readonly property int cellSize: 10
-    readonly property int cellSpacing: 2
+    // Cell sizing - comfortable larger GitHub/Plasma style
+    readonly property int cellSize: 13
+    readonly property int cellSpacing: 3
     readonly property int cellRadius: 2
 
     readonly property bool isDark: Kirigami.Theme.backgroundColor.r < 0.5
@@ -126,7 +126,7 @@ Item {
         // Day of week labels (Lun, Mié, Vie)
         Column {
             id: dayLabelsCol
-            width: 22
+            width: 24
             spacing: cellSpacing
 
             Repeater {
