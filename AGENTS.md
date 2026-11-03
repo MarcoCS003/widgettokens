@@ -1,7 +1,16 @@
 # AGENTS.md — WidgetTokens
 
 ## Descripción del Proyecto
+
+
+
 Quiero desarrollar un proyecto completo de seguimiento de uso de tokens con visualización en un Widget de KDE Plasma estilo "heatmap de contribuciones de GitHub" (matriz 7 días x 52 semanas
+    con intensidades de verde y tooltips detallados).
+
+    El proyecto debe consolidar el consumo de 2 herramientas principales y sincronizarse entre 2 computadoras conectadas por Tailscale (PC Trabajo = Servidor central, PC Personal = Cliente y
+    visualizador).
+
+
 
 - **Living Brain (Outline IJL):** https://server001.taild8105f.ts.net
 - **Metodología Oficial:** Organic-Driven Development (ODD)

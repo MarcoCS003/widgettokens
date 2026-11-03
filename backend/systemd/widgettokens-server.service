@@ -1,0 +1,14 @@
+[Unit]
+Description=WidgetTokens Central Server (Tailscale)
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=%h/Documentos/Proyectos/widgettokens
+ExecStart=/usr/bin/python3 -m backend.server --host 0.0.0.0 --port 8765 --db %h/.local/share/widgettokens/tokens.db
+Restart=always
+RestartSec=10
+Environment=PYTHONUNBUFFERED=1
+
+[Install]
+WantedBy=default.target

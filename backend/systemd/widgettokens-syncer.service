@@ -1,0 +1,11 @@
+[Unit]
+Description=WidgetTokens Client Syncer One-Shot
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Documentos/Proyectos/widgettokens
+# Default points to Work PC (marcoijl) over Tailscale
+ExecStart=/usr/bin/python3 -m backend.syncer --once --machine personal
+Environment=PYTHONUNBUFFERED=1
+Environment=WIDGETTOKENS_SERVER_URL=http://100.121.178.86:8765

@@ -28,3 +28,12 @@ __pycache__/
 *.swo
 .DS_Store
 Thumbs.db
+
+# Databases & Cache
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+.cache/
+history.json
+
