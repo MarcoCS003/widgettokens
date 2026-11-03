@@ -8,4 +8,4 @@ WorkingDirectory=%h/Documentos/Proyectos/widgettokens
 # Automatically detects local computer hostname via socket.gethostname()
 ExecStart=/usr/bin/python3 -m backend.syncer --once
 Environment=PYTHONUNBUFFERED=1
-Environment=WIDGETTOKENS_SERVER_URL=http://100.121.178.86:8765
+Environment=WIDGETTOKENS_SERVER_URL=http://127.0.0.1:8765

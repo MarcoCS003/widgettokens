@@ -232,13 +232,6 @@ Item {
                                     color: Qt.rgba(Kirigami.Theme.textColor.r, Kirigami.Theme.textColor.g, Kirigami.Theme.textColor.b, 0.15)
                                 }
 
-                                // Machines active only
-                                QQC2.Label {
-                                    visible: text.length > 0
-                                    text: heatmapRoot.getActiveMachinesText(modelData.by_machine)
-                                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.80
-                                }
-
                                 // Harnesses active only
                                 QQC2.Label {
                                     visible: text.length > 0
