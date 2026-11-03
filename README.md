@@ -49,26 +49,21 @@ WidgetTokens automatically discovers and parses token usage from:
 
 ---
 
-## 🚀 Quick Start & Installation
+## 🚀 Installation
 
-### Requirements
-- **KDE Plasma 6**
-- **Python 3.10+** (standard libraries only)
-- `kpackagetool6` (included with KDE Plasma)
+### Option 1: Direct from KDE Store (Plug & Play - Recommended)
+1. Right-click your desktop or panel ➔ **Add Widgets...** ➔ **Get New Widgets...** ➔ **Download New Plasma Widgets**.
+2. Search for **AI Tokens Heatmap** and click **Install**.
+3. Add the widget to your desktop or panel.
 
-### One-Command Setup
-Clone the repository and run the installer:
+*Zero setup required! The widget contains an embedded autonomous Python engine that automatically detects your local agent databases, extracts token counts, and refreshes the heatmap in the background.*
 
+### Option 2: From Source
 ```bash
 git clone https://github.com/MarcoCS003/widgettokens.git
 cd widgettokens
 ./install.sh
 ```
-
-The installer will:
-1. Register and install the Plasmoid package in KDE Plasma 6.
-2. Configure a background `systemd --user` timer (`widgettokens.timer`) that refreshes metrics every 3 minutes.
-3. Perform an initial extraction and generate your local history cache.
 
 ### Preview Immediately
 You can test the widget in a standalone window without adding it to your desktop:

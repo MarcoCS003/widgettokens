@@ -155,14 +155,15 @@ PlasmoidItem {
         var base = StandardPaths.writableLocation(StandardPaths.GenericCacheLocation).toString();
         return base.replace(/^file:\/\//, "") + "/plasma-tokens/history.json";
     }
-    readonly property string readCmd: "cat " + cacheFilePath
+    readonly property string scriptPath: Qt.resolvedUrl("../scripts/run_collector.py").toString().replace(/^file:\/\//, "")
+    readonly property string runCmd: "python3 \"" + scriptPath + "\""
 
-    // Executable DataSource to read history JSON file
+    // Executable DataSource to run autonomous collector & read history JSON
     Plasma5Support.DataSource {
         id: fileDataSource
         engine: "executable"
-        connectedSources: [root.readCmd]
-        interval: 10000 // Runs every 10 seconds
+        connectedSources: [root.runCmd]
+        interval: 180000 // Runs automatically every 3 minutes
 
         onNewData: function(sourceName, data) {
             var stdout = data["stdout"];
@@ -177,6 +178,7 @@ PlasmoidItem {
     }
 
     function loadHistory() {
-        fileDataSource.connectSource(root.readCmd);
+        fileDataSource.disconnectSource(root.runCmd);
+        fileDataSource.connectSource(root.runCmd);
     }
 }
