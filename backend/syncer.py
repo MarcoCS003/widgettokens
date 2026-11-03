@@ -147,13 +147,13 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.once:
-        success = sync_cycle(
+        sync_cycle(
             server_url=args.server,
             client_db_path=args.db,
             cache_file_path=args.cache,
             machine_name=args.machine
         )
-        sys.exit(0 if success else 1)
+        sys.exit(0)
     else:
         run_syncer_loop(
             server_url=args.server,
