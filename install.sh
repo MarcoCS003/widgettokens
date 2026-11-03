@@ -1,90 +1,63 @@
 #!/usr/bin/env bash
 set -e
 
-# WidgetTokens - Script de Instalación y Despliegue
+# WidgetTokens - Instalador Standalone Local (KDE Plasma 6)
 # Uso:
-#   ./install.sh server     # Configura e inicia el servidor central (PC Trabajo)
-#   ./install.sh client     # Configura el plasmoid y el timer de sincronización (PC Personal)
-#   ./install.sh widget     # Solo instala/actualiza el Plasmoid en Plasma 6
+#   ./install.sh            # Instala y activa todo en la computadora actual (Modo Standalone)
+#   ./install.sh widget     # Solo instala o actualiza el Plasmoid en Plasma 6
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SYSTEMD_USER_DIR="$HOME/.config/systemd/user"
 CACHE_DIR="$HOME/.cache/plasma-tokens"
 
-echo "=== WidgetTokens Installer ==="
+echo "=== WidgetTokens Installer (Standalone Local) ==="
+
+# Función para instalar plasmoid
+install_plasmoid() {
+    if kpackagetool6 --type Plasma/Applet --show org.kde.plasma.tokens >/dev/null 2>&1; then
+        echo "[+] Actualizando Plasmoid existente en KDE Plasma 6..."
+        kpackagetool6 --type Plasma/Applet --upgrade "$SCRIPT_DIR/plasmoid"
+    else
+        echo "[+] Instalando Plasmoid en KDE Plasma 6..."
+        kpackagetool6 --type Plasma/Applet --install "$SCRIPT_DIR/plasmoid"
+    fi
+}
 
 case "$1" in
-    server)
-        echo "[+] Configurando Servidor Central (PC Trabajo)..."
-        mkdir -p "$SYSTEMD_USER_DIR"
-        mkdir -p "$HOME/.local/share/widgettokens"
-
-        # Extraer tokens iniciales de la PC
-        echo "[+] Extrayendo tokens locales (OpenCode, Antigravity, Claude Code, OpenClaw)..."
-        python3 -m backend.collector || true
-
-        # Actualizar ruta en archivo de servicio
-        sed "s|WorkingDirectory=.*|WorkingDirectory=$SCRIPT_DIR|g" \
-            "$SCRIPT_DIR/backend/systemd/widgettokens-server.service" > "$SYSTEMD_USER_DIR/widgettokens-server.service"
-
-        systemctl --user daemon-reload
-        systemctl --user enable --now widgettokens-server.service
-
-        echo "[✓] Servidor central instalado y corriendo en systemd --user."
-        echo "    Verifica el estado con: systemctl --user status widgettokens-server"
-        echo "    Verifica el endpoint con: curl http://localhost:8765/health"
-        echo ""
-        echo "[i] NOTA SOBRE FIREWALL (Fedora / RHEL):"
-        echo "    Si tu PC personal no puede conectar por Tailscale, abre el puerto 8765 en esta PC con:"
-        echo "    sudo firewall-cmd --add-port=8765/tcp --permanent && sudo firewall-cmd --reload"
-        ;;
-
-    client)
-        echo "[+] Configurando Cliente y Plasmoid (PC Personal)..."
-        mkdir -p "$SYSTEMD_USER_DIR"
-        mkdir -p "$CACHE_DIR"
-
-        # Instalar o actualizar plasmoid
-        if kpackagetool6 --type Plasma/Applet --show org.kde.plasma.tokens >/dev/null 2>&1; then
-            echo "[+] Actualizando Plasmoid existente en KDE Plasma 6..."
-            kpackagetool6 --type Plasma/Applet --upgrade "$SCRIPT_DIR/plasmoid"
-        else
-            echo "[+] Instalando Plasmoid en KDE Plasma 6..."
-            kpackagetool6 --type Plasma/Applet --install "$SCRIPT_DIR/plasmoid"
-        fi
-
-        # Instalar timer y service
-        sed "s|WorkingDirectory=.*|WorkingDirectory=$SCRIPT_DIR|g" \
-            "$SCRIPT_DIR/backend/systemd/widgettokens-syncer.service" > "$SYSTEMD_USER_DIR/widgettokens-syncer.service"
-        cp "$SCRIPT_DIR/backend/systemd/widgettokens-syncer.timer" "$SYSTEMD_USER_DIR/"
-
-        systemctl --user daemon-reload
-        systemctl --user enable --now widgettokens-syncer.timer
-
-        # Ejecutar sincronización inicial offline/online
-        echo "[+] Ejecutando primera sincronización y extracción local..."
-        python3 -m backend.syncer --once || true
-
-        echo "[✓] Cliente y Plasmoid instalados con éxito."
-        echo "    Puedes probar el widget con: plasmawindowed org.kde.plasma.tokens"
-        ;;
-
     widget)
-        echo "[+] Instalando/Actualizando únicamente el Plasmoid..."
-        if kpackagetool6 --type Plasma/Applet --show org.kde.plasma.tokens >/dev/null 2>&1; then
-            kpackagetool6 --type Plasma/Applet --upgrade "$SCRIPT_DIR/plasmoid"
-        else
-            kpackagetool6 --type Plasma/Applet --install "$SCRIPT_DIR/plasmoid"
-        fi
+        install_plasmoid
         echo "[✓] Plasmoid instalado. Pruébalo con: plasmawindowed org.kde.plasma.tokens"
         ;;
 
     *)
-        echo "Uso: $0 {server|client|widget}"
+        echo "[+] Configurando entorno standalone local en esta computadora..."
+        mkdir -p "$SYSTEMD_USER_DIR"
+        mkdir -p "$CACHE_DIR"
+        mkdir -p "$HOME/.local/share/widgettokens"
+
+        # Detener servicios antiguos si existían
+        systemctl --user stop widgettokens-server.service widgettokens-syncer.timer widgettokens-syncer.service 2>/dev/null || true
+        systemctl --user disable widgettokens-server.service widgettokens-syncer.timer 2>/dev/null || true
+
+        # Instalar plasmoid
+        install_plasmoid
+
+        # Configurar servicio y timer systemd local
+        echo "[+] Instalando servicio systemd de recolección local..."
+        sed "s|WorkingDirectory=.*|WorkingDirectory=$SCRIPT_DIR|g" \
+            "$SCRIPT_DIR/backend/systemd/widgettokens.service" > "$SYSTEMD_USER_DIR/widgettokens.service"
+        cp "$SCRIPT_DIR/backend/systemd/widgettokens.timer" "$SYSTEMD_USER_DIR/"
+
+        systemctl --user daemon-reload
+        systemctl --user enable --now widgettokens.timer
+
+        # Ejecutar recolección y exportación inicial (182 días / 6 meses)
+        echo "[+] Extrayendo tokens locales (OpenCode, Antigravity, Claude, OpenClaw, Hermes)..."
+        python3 -m backend.collector
+
         echo ""
-        echo "  server: Instala el servicio systemd del servidor central en PC Trabajo."
-        echo "  client: Instala el Plasmoid y el timer de sincronización en PC Personal."
-        echo "  widget: Instala o actualiza únicamente el Plasmoid de Plasma 6."
-        exit 1
+        echo "[✓] Instalación completada con éxito."
+        echo "    El widget se actualizará automáticamente cada 3 minutos en segundo plano."
+        echo "    Puedes probar el widget con: plasmawindowed org.kde.plasma.tokens"
         ;;
 esac

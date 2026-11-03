@@ -8,10 +8,10 @@ Item {
 
     required property var plasmoidItem
 
-    Layout.minimumWidth: 520
-    Layout.minimumHeight: 240
-    Layout.preferredWidth: 680
-    Layout.preferredHeight: 275
+    Layout.minimumWidth: 350
+    Layout.minimumHeight: 210
+    Layout.preferredWidth: 420
+    Layout.preferredHeight: 240
 
     readonly property color borderColor: Qt.rgba(Kirigami.Theme.textColor.r, Kirigami.Theme.textColor.g, Kirigami.Theme.textColor.b, 0.18)
 
@@ -33,24 +33,28 @@ Item {
 
             ColumnLayout {
                 spacing: 0
+                Layout.fillWidth: true
+
                 QQC2.Label {
                     text: "Consumo de Tokens IA"
                     font.bold: true
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.05
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
                 }
                 QQC2.Label {
                     text: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.rangeText : ""
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.80
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.78
                     color: Kirigami.Theme.disabledTextColor
+                    elide: Text.ElideRight
+                    Layout.fillWidth: true
                 }
             }
-
-            Item { Layout.fillWidth: true }
 
             QQC2.Button {
                 icon.name: "view-refresh"
                 text: "Actualizar"
-                font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.85
+                font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.82
                 onClicked: {
                     if (fullRoot.plasmoidItem) {
                         fullRoot.plasmoidItem.loadHistory();
@@ -59,7 +63,7 @@ Item {
             }
         }
 
-        // --- Metric Cards (Compact: 3 Cards) ---
+        // --- Metric Cards (Compact: 2 Cards Adaptable) ---
         RowLayout {
             Layout.fillWidth: true
             spacing: Kirigami.Units.smallSpacing
@@ -92,7 +96,7 @@ Item {
                 }
             }
 
-            // Card 2: Total 365 días
+            // Card 2: Semestre (6 Meses)
             Rectangle {
                 Layout.fillWidth: true
                 height: 48
@@ -105,7 +109,7 @@ Item {
                     anchors.centerIn: parent
                     spacing: 1
                     QQC2.Label {
-                        text: "Total Anual"
+                        text: "Últimos 6 Meses"
                         font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.75
                         color: Kirigami.Theme.disabledTextColor
                         Layout.alignment: Qt.AlignHCenter
@@ -119,36 +123,9 @@ Item {
                     }
                 }
             }
-
-            // Card 3: Por Computadora
-            Rectangle {
-                Layout.fillWidth: true
-                height: 48
-                radius: 4
-                color: Kirigami.Theme.alternateBackgroundColor
-                border.width: 1
-                border.color: fullRoot.borderColor
-
-                ColumnLayout {
-                    anchors.centerIn: parent
-                    spacing: 1
-                    QQC2.Label {
-                        text: "Por Computadora"
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.75
-                        color: Kirigami.Theme.disabledTextColor
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-                    QQC2.Label {
-                        text: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.computersSummaryText : "0%"
-                        font.bold: true
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.90
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-                }
-            }
         }
 
-        // --- Heatmap Annual Matrix (7 x 52) ---
+        // --- Heatmap Semi-Annual Matrix (~26 weeks x 7 days) ---
         Rectangle {
             Layout.fillWidth: true
             Layout.preferredHeight: 102
@@ -156,12 +133,21 @@ Item {
             radius: 4
             border.width: 1
             border.color: fullRoot.borderColor
+            clip: true
 
-            HeatmapGrid {
-                id: heatmap
-                plasmoidItem: fullRoot.plasmoidItem
-                anchors.centerIn: parent
-                daysList: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.daysList : []
+            Flickable {
+                id: heatmapFlickable
+                anchors.fill: parent
+                contentWidth: Math.max(heatmap.implicitWidth, width)
+                contentHeight: Math.max(heatmap.implicitHeight, height)
+                interactive: width < heatmap.implicitWidth
+
+                HeatmapGrid {
+                    id: heatmap
+                    plasmoidItem: fullRoot.plasmoidItem
+                    anchors.centerIn: parent
+                    daysList: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.daysList : []
+                }
             }
         }
 
@@ -182,21 +168,17 @@ Item {
                             return dt + "  •  Sin actividad";
                         }
                         var totStr = (fullRoot.plasmoidItem ? fullRoot.plasmoidItem.formatTokens(tot) : tot) + " tokens";
-                        var machText = heatmap.getActiveMachinesText(h.by_machine);
                         var srcText = heatmap.getActiveSourcesText(h.by_source);
 
                         var res = dt + "  •  " + totStr;
-                        if (machText.length > 0) {
-                            res += "  [" + machText + "]";
-                        }
                         if (srcText.length > 0) {
                             res += "  [" + srcText + "]";
                         }
                         return res;
                     }
-                    return "Pasa el cursor sobre una celda para ver el detalle diario.";
+                    return "Pasa el cursor sobre una celda para ver el detalle.";
                 }
-                font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.80
+                font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.78
                 color: heatmap.hoveredDay ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
                 Layout.fillWidth: true
                 elide: Text.ElideRight
@@ -209,7 +191,7 @@ Item {
 
                 QQC2.Label {
                     text: "Menos "
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.72
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.70
                     color: Kirigami.Theme.disabledTextColor
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -228,7 +210,7 @@ Item {
 
                 QQC2.Label {
                     text: " Más"
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.72
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.70
                     color: Kirigami.Theme.disabledTextColor
                     anchors.verticalCenter: parent.verticalCenter
                 }

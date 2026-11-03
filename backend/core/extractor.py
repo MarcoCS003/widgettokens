@@ -10,6 +10,7 @@ DEFAULT_OPENCODE_DB = os.path.expanduser("~/.local/share/opencode/opencode.db")
 DEFAULT_ANTIGRAVITY_BRAIN_DIR = os.path.expanduser("~/.gemini/antigravity-cli/brain")
 DEFAULT_CLAUDE_DIR = os.path.expanduser("~/.claude")
 DEFAULT_OPENCLAW_DIR = os.path.expanduser("~/.openclaw")
+DEFAULT_HERMES_DB = os.path.expanduser("~/.hermes/state.db")
 
 
 def generate_event_id(machine: str, source: str, record_id: str) -> str:
@@ -363,3 +364,86 @@ def extract_openclaw_events(
                     }
         except Exception:
             continue
+
+
+def extract_hermes_events(
+    db_path: str = DEFAULT_HERMES_DB,
+    machine_name: str = "personal",
+    since_timestamp: Optional[str] = None
+) -> Iterator[Dict[str, Any]]:
+    """
+    Extracts token usage events from Hermes agent SQLite database (~/.hermes/state.db).
+    Queries the 'sessions' table for token metrics.
+    """
+    if not os.path.exists(db_path):
+        return
+
+    uri = f"file:{os.path.abspath(db_path)}?mode=ro"
+    try:
+        conn = sqlite3.connect(uri, uri=True)
+    except sqlite3.OperationalError:
+        conn = sqlite3.connect(db_path)
+
+    try:
+        conn.row_factory = sqlite3.Row
+        cur = conn.cursor()
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name='sessions'")
+        if not cur.fetchone():
+            return
+
+        query = """
+            SELECT id, started_at, input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, model
+            FROM sessions
+            WHERE (input_tokens > 0 OR output_tokens > 0)
+            ORDER BY started_at ASC
+        """
+        for row in cur.execute(query):
+            started_at = row["started_at"]
+            if not started_at:
+                continue
+
+            try:
+                ts_val = float(started_at)
+                dt = datetime.fromtimestamp(ts_val, tz=timezone.utc)
+                iso_ts = dt.isoformat()
+                date_str = dt.strftime("%Y-%m-%d")
+            except Exception:
+                continue
+
+            if since_timestamp and iso_ts <= since_timestamp:
+                continue
+
+            inp = int(row["input_tokens"] or 0)
+            out = int(row["output_tokens"] or 0)
+            cache_read = int(row["cache_read_tokens"] or 0)
+            cache_write = int(row["cache_write_tokens"] or 0)
+            cache = cache_read + cache_write
+            tot = inp + out + cache
+
+            if tot <= 0:
+                continue
+
+            session_id = str(row["id"])
+            event_id = generate_event_id(machine_name, "hermes", session_id)
+
+            yield {
+                "id": event_id,
+                "machine": machine_name,
+                "source": "hermes",
+                "source_record_id": session_id,
+                "timestamp": iso_ts,
+                "date": date_str,
+                "input_tokens": inp,
+                "output_tokens": out,
+                "cache_tokens": cache,
+                "total_tokens": tot,
+                "raw_json": json.dumps({
+                    "model": row["model"] if "model" in row.keys() else None,
+                    "session_id": session_id
+                })
+            }
+    except Exception:
+        return
+    finally:
+        conn.close()
+

@@ -1,0 +1,9 @@
+[Unit]
+Description=WidgetTokens Standalone Local Collector & Exporter
+After=network.target
+
+[Service]
+Type=oneshot
+WorkingDirectory=%h/Documentos/Proyectos/widgettokens
+ExecStart=/usr/bin/python3 -m backend.collector
+Environment=PYTHONUNBUFFERED=1

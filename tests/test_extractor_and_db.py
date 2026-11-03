@@ -18,6 +18,7 @@ from backend.core.extractor import (
     extract_antigravity_events,
     extract_claude_events,
     extract_openclaw_events,
+    extract_hermes_events,
     generate_event_id,
 )
 
@@ -175,6 +176,46 @@ class TestDatabaseAndExtractor(unittest.TestCase):
         self.assertEqual(ev["input_tokens"], 1500)
         self.assertEqual(ev["output_tokens"], 350)
         self.assertEqual(ev["cache_tokens"], 200)
+
+    def test_extract_hermes(self):
+        hermes_dir = os.path.join(self.temp_dir.name, ".hermes")
+        os.makedirs(hermes_dir, exist_ok=True)
+        db_path = os.path.join(hermes_dir, "state.db")
+
+        conn = sqlite3.connect(db_path)
+        cur = conn.cursor()
+        cur.execute("""
+            CREATE TABLE sessions (
+                id TEXT PRIMARY KEY,
+                started_at REAL,
+                input_tokens INTEGER,
+                output_tokens INTEGER,
+                cache_read_tokens INTEGER,
+                cache_write_tokens INTEGER,
+                model TEXT
+            );
+        """)
+        # 1778128101 is around May 2026
+        cur.execute("""
+            INSERT INTO sessions (id, started_at, input_tokens, output_tokens, cache_read_tokens, cache_write_tokens, model)
+            VALUES ('sess_123', 1778128101.0, 1000, 250, 500, 100, 'hermes-3');
+        """)
+        conn.commit()
+        conn.close()
+
+        extracted = list(extract_hermes_events(
+            db_path=db_path,
+            machine_name="fedora"
+        ))
+        self.assertEqual(len(extracted), 1)
+        ev = extracted[0]
+        self.assertEqual(ev["source"], "hermes")
+        self.assertEqual(ev["machine"], "fedora")
+        self.assertEqual(ev["source_record_id"], "sess_123")
+        self.assertEqual(ev["input_tokens"], 1000)
+        self.assertEqual(ev["output_tokens"], 250)
+        self.assertEqual(ev["cache_tokens"], 600)
+        self.assertEqual(ev["total_tokens"], 1850)
 
 
 if __name__ == "__main__":

@@ -40,7 +40,7 @@ PlasmoidItem {
         if (historyData && historyData.summary && historyData.summary.range_start) {
             return historyData.summary.range_start + " — " + historyData.summary.range_end;
         }
-        return "Últimos 365 días";
+        return "Últimos 6 meses";
     }
 
     function formatTokens(count) {
@@ -95,6 +95,7 @@ PlasmoidItem {
         if (src === "antigravity") return "Antigravity";
         if (src === "claude") return "Claude";
         if (src === "openclaw") return "OpenClaw";
+        if (src === "hermes") return "Hermes";
         return src.charAt(0).toUpperCase() + src.slice(1);
     }
 
@@ -103,45 +104,28 @@ PlasmoidItem {
         if (src === "antigravity") return "🚀";
         if (src === "claude") return "🟣";
         if (src === "openclaw") return "🦀";
+        if (src === "hermes") return "🪽";
         return "🤖";
     }
 
-    readonly property string computersSummaryText: {
-        if (!grandTotal || !historyData.summary || !historyData.summary.by_machine) return "0%";
-        var raw = historyData.summary.by_machine;
-        var aggregated = {};
-        for (var k in raw) {
-            var norm = normalizeMachine(k);
-            aggregated[norm] = (aggregated[norm] || 0) + (raw[k] || 0);
-        }
+    readonly property string toolsSummaryText: {
+        if (!grandTotal || !historyData.summary || !historyData.summary.by_source) return "0%";
+        var raw = historyData.summary.by_source;
         var parts = [];
-        for (var m in aggregated) {
-            var val = aggregated[m];
+        for (var s in raw) {
+            var val = raw[s] || 0;
             if (val > 0) {
                 var pct = Math.round((val / grandTotal) * 100);
-                parts.push(machineIcon(m) + " " + m + " " + pct + "%");
+                parts.push(sourceIcon(s) + " " + pct + "%");
             }
         }
-        return parts.length > 0 ? parts.join("  |  ") : "0%";
+        return parts.length > 0 ? parts.join(" ") : "0%";
     }
 
     toolTipMainText: "Tokens IA: " + formatTokens(todayTokens) + " hoy"
     toolTipSubText: {
         var summary = (historyData && historyData.summary) ? historyData.summary : {};
-        var byMach = summary.by_machine || {};
         var bySrc = summary.by_source || {};
-
-        var machParts = [];
-        var normMach = {};
-        for (var mk in byMach) {
-            var nm = normalizeMachine(mk);
-            normMach[nm] = (normMach[nm] || 0) + (byMach[mk] || 0);
-        }
-        for (var m in normMach) {
-            if (normMach[m] > 0) {
-                machParts.push(machineIcon(m) + " " + m + ": " + formatTokens(normMach[m]));
-            }
-        }
 
         var srcParts = [];
         for (var s in bySrc) {
@@ -150,10 +134,7 @@ PlasmoidItem {
             }
         }
 
-        var text = "Anual: " + formatTokens(grandTotal);
-        if (machParts.length > 0) {
-            text += "\n" + machParts.join("  |  ");
-        }
+        var text = "Semestre (6m): " + formatTokens(grandTotal);
         if (srcParts.length > 0) {
             text += "\n" + srcParts.join("  |  ");
         }
