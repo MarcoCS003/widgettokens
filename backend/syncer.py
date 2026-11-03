@@ -20,7 +20,8 @@ from backend.collector import collect_all
 
 DEFAULT_CACHE_DIR = os.path.expanduser("~/.cache/plasma-tokens")
 DEFAULT_CACHE_PATH = os.path.join(DEFAULT_CACHE_DIR, "history.json")
-DEFAULT_SERVER_URL = "http://127.0.0.1:8765"
+# IP Tailscale de la PC de Trabajo (marcoijl)
+DEFAULT_SERVER_URL = "http://100.121.178.86:8765"
 
 logger = logging.getLogger("widgettokens.syncer")
 
