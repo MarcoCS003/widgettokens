@@ -37,3 +37,8 @@ Thumbs.db
 .cache/
 history.json
 
+# Local AI configs & Agent workflows
+AGENTS.md
+opencode.json
+.agents/
+

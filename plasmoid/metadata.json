@@ -3,20 +3,20 @@
   "KPlugin": {
     "Authors": [
       {
-        "Email": "marco@example.com",
+        "Email": "marcocarrasco003@gmail.com",
         "Name": "Marco Carrasco"
       }
     ],
     "Category": "Utilities",
-    "Description": "GitHub-style contribution heatmap for AI token usage (OpenCode & Antigravity) synced via Tailscale",
-    "Description[es]": "Matriz 7x52 de consumo de tokens IA estilo GitHub (OpenCode y Antigravity) sincronizado por Tailscale",
+    "Description": "GitHub-style contribution heatmap for tracking AI token usage (OpenCode, Antigravity, Claude Code, Hermes, OpenClaw)",
+    "Description[es]": "Mapa de calor de consumo de tokens IA estilo GitHub (OpenCode, Antigravity, Claude Code, Hermes, OpenClaw)",
     "Icon": "view-calendar-timeline",
     "Id": "org.kde.plasma.tokens",
     "License": "MIT",
-    "Name": "Widget Tokens Heatmap",
+    "Name": "AI Tokens Heatmap",
     "Name[es]": "Heatmap de Tokens IA",
     "Version": "1.0.0",
-    "Website": "https://server001.taild8105f.ts.net"
+    "Website": "https://github.com/MarcoCS003/widgettokens"
   },
   "X-Plasma-API-Minimum-Version": "6.0"
 }

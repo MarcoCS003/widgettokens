@@ -1,97 +1,124 @@
 # WidgetTokens 📊
 
-Seguimiento de uso de tokens IA para **OpenCode** y **Antigravity** con visualización estilo **GitHub Heatmap (7 días x 52 semanas)** en un Widget nativo de **KDE Plasma 6**, sincronizado entre estaciones de trabajo (PC Trabajo y PC Personal) a través de **Tailscale**.
+[![KDE Plasma 6](https://img.shields.io/badge/KDE-Plasma%206-3daee9?style=flat&logo=kde&logoColor=white)](https://kde.org/plasma-desktop/)
+[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776ab?style=flat&logo=python&logoColor=white)](https://python.org)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Standard%20Library%20Only-success)]()
+
+A native **KDE Plasma 6** desktop and panel widget that visualizes your AI token consumption as a **GitHub-style contribution heatmap (7 days x 30 weeks)**. It automatically tracks and consolidates tokens used across popular AI coding agents and CLI harnesses, operating **100% locally with zero cloud or external dependencies**.
 
 ---
 
-## 🌟 Características
+## 🌟 Supported AI Harnesses & Agents
 
-- **Matriz 7x52 Anual:** 7 días de la semana (Lunes a Domingo) x 52 semanas en cuadrícula de verdes con 4 niveles de intensidad cuartílica calculados dinámicamente.
-- **Doble Fuente de Datos:**
-  - **OpenCode:** Extracción automática desde SQLite (`~/.local/share/opencode/opencode.db`).
-  - **Antigravity:** Extracción directa de logs JSONL (`~/.gemini/antigravity-cli/brain/*/.system_generated/logs/transcript.jsonl`).
-- **Arquitectura Centralizada (Tailscale):**
-  - **PC Trabajo (Servidor Central):** Micro-servicio en Python puro (`http.server` y `sqlite3`, sin dependencias pesadas ni frameworks externos) con arranque automático `systemd --user`.
-  - **PC Personal (Cliente & Visor):** Recolector local y sincronizador delta hacia el servidor, con almacenamiento en caché (`~/.cache/plasma-tokens/history.json`) y **soporte offline automático**.
-- **Plasmoid KDE Plasma 6:**
-  - Modo panel compacto con contador del día (badge adaptativo: e.g. `14.2k`, `1.2M`).
-  - Modo expandido de escritorio con 4 tarjetas de métricas (Hoy, Total Anual, % por Máquina y % por Herramienta), cuadrícula anual y tooltips interactivos detallados.
-  - Compatible con temas oscuros y claros de Plasma.
+WidgetTokens automatically discovers and parses token usage from:
+
+| Agent / Harness | Source Path | Extraction Method |
+| :--- | :--- | :--- |
+| **OpenCode** (`⚡`) | `~/.local/share/opencode/opencode.db` | Native SQLite read-only query |
+| **Antigravity** (`🚀`) | `~/.gemini/antigravity-cli/brain/*/logs/transcript.jsonl` | JSONL streaming & planner response usage |
+| **Claude Code** (`🟣`) | `~/.claude/projects/*/*.jsonl` | Session conversation usage blocks |
+| **Hermes Agent** (`🪽`) | `~/.hermes/state.db` | Native SQLite read-only session metrics |
+| **OpenClaw** (`🦀`) | `~/.openclaw/sessions/` | Agent execution sessions and step logs |
 
 ---
 
-## 📁 Estructura del Repositorio
+## ✨ Features
+
+- **7-Month Activity Heatmap:** 7 days/week x 30 weeks matrix rendered in Plasma's native blue theme.
+- **Dynamic Quartile Color Scaling:**
+  - **Level 0 (`#161b22`):** Inactive (0 tokens)
+  - **Level 1 (`#0a3069`):** Low (1 — Q1)
+  - **Level 2 (`#1158c7`):** Moderate (Q1 — Median)
+  - **Level 3 (`#1f6feb`):** High (Median — Q3)
+  - **Level 4 (`#58a6ff`):** Very High (Q3 — 100M)
+  - **Level 5 (`#79e2fb`):** **Epic (> 100M tokens)** highlighted in neon cyan.
+- **Detailed Interactive Tooltips:**
+  - Hovering any day displays total tokens, active harnesses only (inactive tools are hidden), and token breakdown (`Input`, `Output`, `Cache`).
+  - Hovering the color legend squares displays the exact numerical boundaries of each tier.
+- **Clean & Human-Readable Numbers:** Formats millions as `52.096 M` and thousands as `245 k` (eliminates ugly scientific notation).
+- **100% Local & Private (Standalone):** No tracking servers, external APIs, or network requests required. All data remains strictly on your local disk.
+- **Compact & Elastic UI:** Minimum width of 420px, responsive layout with smooth flickable container, fits in desktop setups and panels alike.
+- **Zero Heavy Dependencies:** Python backend is implemented exclusively using standard libraries (`sqlite3`, `json`, `hashlib`, `glob`).
+
+---
+
+## 🚀 Quick Start & Installation
+
+### Requirements
+- **KDE Plasma 6**
+- **Python 3.10+** (standard libraries only)
+- `kpackagetool6` (included with KDE Plasma)
+
+### One-Command Setup
+Clone the repository and run the installer:
+
+```bash
+git clone https://github.com/MarcoCS003/widgettokens.git
+cd widgettokens
+./install.sh
+```
+
+The installer will:
+1. Register and install the Plasmoid package in KDE Plasma 6.
+2. Configure a background `systemd --user` timer (`widgettokens.timer`) that refreshes metrics every 3 minutes.
+3. Perform an initial extraction and generate your local history cache.
+
+### Preview Immediately
+You can test the widget in a standalone window without adding it to your desktop:
+
+```bash
+plasmawindowed org.kde.plasma.tokens
+```
+
+Or right-click your desktop / panel -> **Add Widgets...** -> Search for **Consumo de Tokens IA**.
+
+---
+
+## 📁 Repository Structure
 
 ```text
 widgettokens/
 ├── backend/
 │   ├── core/
 │   │   ├── __init__.py
-│   │   ├── db.py                 # Esquema SQLite, idempotencia y agregador 365d
-│   │   └── extractor.py          # Extractor para OpenCode y Antigravity
-│   ├── server.py                 # Servidor HTTP REST (POST /api/sync, GET /api/tokens)
-│   ├── collector.py              # Extractor local y persistencia de watermarks
-│   ├── syncer.py                 # Cliente de sincronización con soporte offline
+│   │   ├── db.py                 # SQLite storage, state watermarks & matrix aggregator
+│   │   └── extractor.py          # Parsers for OpenCode, Antigravity, Claude, Hermes, OpenClaw
+│   ├── collector.py              # Local extraction runner & atomic history exporter
+│   ├── server.py                 # Optional REST server (for multi-machine setups)
+│   ├── syncer.py                 # Optional delta syncer (for multi-machine setups)
 │   └── systemd/
-│       ├── widgettokens-server.service   # Servicio systemd --user para el Servidor
-│       ├── widgettokens-syncer.service   # Servicio oneshot para el Cliente
-│       └── widgettokens-syncer.timer     # Timer periódico (cada 5 minutos)
+│       ├── widgettokens.service  # Standalone local collector oneshot service
+│       └── widgettokens.timer    # 3-minute periodic user timer
 ├── plasmoid/
-│   ├── metadata.json             # Manifiesto Plasma 6 (X-Plasma-API-Minimum-Version: 6.0)
+│   ├── metadata.json             # Plasma 6 applet metadata
 │   └── contents/
 │       └── ui/
-│           ├── main.qml                  # PlasmoidItem y DataSource ejecutable
-│           ├── CompactRepresentation.qml # Vista compacta para la barra de tareas
-│           ├── FullRepresentation.qml    # Vista expandida con métricas e inspector
-│           └── HeatmapGrid.qml           # Matriz 7x52 con tooltips interactivos
+│           ├── main.qml                  # Root PlasmoidItem & DataSource loader
+│           ├── CompactRepresentation.qml # Panel icon & compact token badge
+│           ├── FullRepresentation.qml    # Main expanded desktop view
+│           └── HeatmapGrid.qml           # 7x30 Heatmap grid & interactive tooltips
 ├── tests/
-│   ├── test_extractor_and_db.py  # Pruebas de extracción y cálculo matricial
-│   ├── test_server.py            # Pruebas de endpoints REST
-│   └── test_collector_and_syncer.py # Pruebas del ciclo de sincronización
-├── install.sh                    # Script universal de instalación y despliegue
-├── AGENTS.md                     # Directivas de Organic-Driven Development (ODD)
-└── opencode.json                 # Configuración de agentes y Living Brain
+│   ├── test_extractor_and_db.py  # Unit tests for database & parsers
+│   ├── test_server.py            # Unit tests for HTTP endpoints
+│   └── test_collector_and_syncer.py # Unit tests for sync cycles
+├── install.sh                    # Automated setup script
+└── LICENSE                       # MIT License
 ```
 
 ---
 
-## 🚀 Despliegue Rápido
+## 🧪 Running Unit Tests
 
-### 1. En la PC de Trabajo (Servidor Central)
-```bash
-cd ~/Documentos/Proyectos/widgettokens
-./install.sh server
-```
-El servidor arrancará en el puerto `8765` y se mantendrá activo con `systemd --user`.
-Puedes verificar su estado con:
-```bash
-systemctl --user status widgettokens-server
-curl http://localhost:8765/health
-```
+The test suite runs with standard Python `unittest`:
 
-### 2. En la PC Personal (Cliente y Widget)
-Configura la IP de Tailscale de tu PC de Trabajo:
-```bash
-export WIDGETTOKENS_SERVER_URL="http://<IP_TAILSCALE_TRABAJO>:8765"
-```
-Ejecuta la instalación:
-```bash
-cd ~/Documentos/Proyectos/widgettokens
-./install.sh client
-```
-Esto instalará el Plasmoid en Plasma 6 y activará el timer de sincronización cada 5 minutos.
-
-### 3. Probar el Widget en Ventana
-Para probar inmediatamente el plasmoid sin añadirlo al escritorio:
-```bash
-plasmawindowed org.kde.plasma.tokens
-```
-
----
-
-## 🧪 Ejecución de Pruebas
-
-El proyecto cuenta con una suite completa de pruebas unitarias basadas en `unittest` estándar:
 ```bash
 python3 -m unittest discover tests -v
 ```
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](LICENSE).
+Feel free to use, modify, and distribute it.
