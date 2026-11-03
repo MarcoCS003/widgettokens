@@ -10,7 +10,7 @@
     "Category": "Utilities",
     "Description": "GitHub-style contribution heatmap for tracking AI token usage (OpenCode, Antigravity, Claude Code, Hermes, OpenClaw)",
     "Description[es]": "Mapa de calor de consumo de tokens IA estilo GitHub (OpenCode, Antigravity, Claude Code, Hermes, OpenClaw)",
-    "Icon": "view-calendar-timeline",
+    "Icon": "org.kde.plasma.tokens",
     "Id": "org.kde.plasma.tokens",
     "License": "MIT",
     "Name": "AI Tokens Heatmap",

@@ -1,11 +1,14 @@
-# WidgetTokens 📊
+<div align="center">
+  <img src="assets/logo.svg" alt="WidgetTokens Logo" width="620" />
+  <br/><br/>
 
-[![KDE Plasma 6](https://img.shields.io/badge/KDE-Plasma%206-3daee9?style=flat&logo=kde&logoColor=white)](https://kde.org/plasma-desktop/)
-[![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776ab?style=flat&logo=python&logoColor=white)](https://python.org)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
-[![Zero Dependencies](https://img.shields.io/badge/Dependencies-Standard%20Library%20Only-success)]()
+  [![KDE Plasma 6](https://img.shields.io/badge/KDE-Plasma%206-3daee9?style=flat&logo=kde&logoColor=white)](https://kde.org/plasma-desktop/)
+  [![Python 3.10+](https://img.shields.io/badge/Python-3.10+-3776ab?style=flat&logo=python&logoColor=white)](https://python.org)
+  [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+  [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Standard%20Library%20Only-success)]()
 
-A native **KDE Plasma 6** desktop and panel widget that visualizes your AI token consumption as a **GitHub-style contribution heatmap (7 days x 30 weeks)**. It automatically tracks and consolidates tokens used across popular AI coding agents and CLI harnesses, operating **100% locally with zero cloud or external dependencies**.
+  <p>A native <b>KDE Plasma 6</b> desktop & panel widget that visualizes your AI token consumption as a <b>GitHub-style contribution heatmap (7 days x 30 weeks)</b>. Automatically tracks tokens across popular AI coding agents, operating <b>100% locally with zero cloud or external dependencies</b>.</p>
+</div>
 
 ---
 

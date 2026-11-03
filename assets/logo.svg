@@ -1,0 +1,77 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 760 160" width="100%" height="100%">
+  <defs>
+    <!-- Background Gradient for Icon -->
+    <linearGradient id="iconBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0e17" />
+      <stop offset="100%" stop-color="#161f38" />
+    </linearGradient>
+
+    <!-- Border Gradient -->
+    <linearGradient id="iconBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#79e2fb" stop-opacity="0.9" />
+      <stop offset="60%" stop-color="#1f6feb" stop-opacity="0.4" />
+      <stop offset="100%" stop-color="#0f172a" stop-opacity="0.2" />
+    </linearGradient>
+
+    <!-- Text Gradient for "Tokens" -->
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#58a6ff" />
+      <stop offset="100%" stop-color="#79e2fb" />
+    </linearGradient>
+
+    <!-- Epic Neon Gradient -->
+    <linearGradient id="epicGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#b8f4fd" />
+      <stop offset="100%" stop-color="#79e2fb" />
+    </linearGradient>
+
+    <!-- Glow Filter -->
+    <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3.5" result="blur" />
+      <feMerge>
+        <feMergeNode in="blur" />
+        <feMergeNode in="SourceGraphic" />
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Left Icon Container (120x120) -->
+  <g transform="translate(20, 20)">
+    <rect x="0" y="0" width="120" height="120" rx="28" fill="url(#iconBg)" stroke="url(#iconBorder)" stroke-width="2" />
+
+    <!-- 3x3 Heatmap Grid preview -->
+    <g transform="translate(22, 22)">
+      <!-- Row 0 -->
+      <rect x="0" y="0" width="22" height="22" rx="5" fill="#162032" stroke="#222f47" stroke-width="1" />
+      <rect x="27" y="0" width="22" height="22" rx="5" fill="#1158c7" stroke="#1f6feb" stroke-width="1" />
+      <rect x="54" y="0" width="22" height="22" rx="5" fill="url(#epicGrad)" stroke="#ffffff" stroke-width="1" filter="url(#logoGlow)" />
+
+      <!-- Row 1 -->
+      <rect x="0" y="27" width="22" height="22" rx="5" fill="#0a3069" stroke="#11458e" stroke-width="1" />
+      <rect x="27" y="27" width="22" height="22" rx="5" fill="#58a6ff" stroke="#79c0ff" stroke-width="1" />
+      <rect x="54" y="27" width="22" height="22" rx="5" fill="#1f6feb" stroke="#388bfd" stroke-width="1" />
+
+      <!-- Row 2 -->
+      <rect x="0" y="54" width="22" height="22" rx="5" fill="#1158c7" stroke="#1f6feb" stroke-width="1" />
+      <rect x="27" y="54" width="22" height="22" rx="5" fill="url(#epicGrad)" stroke="#ffffff" stroke-width="1" filter="url(#logoGlow)" />
+      <rect x="54" y="54" width="22" height="22" rx="5" fill="#58a6ff" stroke="#79c0ff" stroke-width="1" />
+    </g>
+
+    <!-- Star Sparkle on Top Epic -->
+    <path d="M 87 28 Q 87 33 92 33 Q 87 33 87 38 Q 87 33 82 33 Q 87 33 87 28 Z" fill="#ffffff" />
+  </g>
+
+  <!-- Typography -->
+  <g transform="translate(165, 0)">
+    <!-- Main Title -->
+    <text x="0" y="74" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="52" font-weight="800" fill="#ffffff" letter-spacing="-0.5px">Widget<tspan fill="url(#textGrad)">Tokens</tspan></text>
+
+    <!-- Subtitle -->
+    <text x="2" y="104" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="16" font-weight="500" fill="#94a3b8" letter-spacing="0.5px">AI Token Heatmap for KDE Plasma 6</text>
+
+    <!-- Harness Badges Line -->
+    <text x="2" y="130" font-family="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif" font-size="12" font-weight="600" fill="#64748b" letter-spacing="0.3px">
+      <tspan fill="#38bdf8">⚡ OpenCode</tspan>  •  <tspan fill="#60a5fa">🚀 Antigravity</tspan>  •  <tspan fill="#c084fc">🟣 Claude</tspan>  •  <tspan fill="#79e2fb">🪽 Hermes</tspan>  •  <tspan fill="#fb7185">🦀 OpenClaw</tspan>
+    </text>
+  </g>
+</svg>

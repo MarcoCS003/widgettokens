@@ -23,7 +23,7 @@ Item {
 
         Kirigami.Icon {
             id: iconItem
-            source: "view-calendar-timeline"
+            source: "org.kde.plasma.tokens"
             Layout.preferredWidth: Kirigami.Units.iconSizes.small
             Layout.preferredHeight: Kirigami.Units.iconSizes.small
         }

@@ -16,7 +16,7 @@ PlasmoidItem {
         PlasmaCore.Types.LeftEdge,
     ].includes(Plasmoid.location)
 
-    Plasmoid.icon: "view-calendar-timeline"
+    Plasmoid.icon: "org.kde.plasma.tokens"
 
     // Model data
     property var historyData: ({ "summary": {}, "days": [] })
