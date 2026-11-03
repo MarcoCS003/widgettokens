@@ -87,7 +87,10 @@ PlasmoidItem {
 
     preferredRepresentation: inPanel ? compactRepresentation : fullRepresentation
 
-    readonly property string cacheFilePath: StandardPaths.writableLocation(StandardPaths.GenericCacheLocation) + "/plasma-tokens/history.json"
+    readonly property string cacheFilePath: {
+        var base = StandardPaths.writableLocation(StandardPaths.GenericCacheLocation).toString();
+        return base.replace(/^file:\/\//, "") + "/plasma-tokens/history.json";
+    }
     readonly property string readCmd: "cat " + cacheFilePath
 
     // Executable DataSource to read history JSON file
