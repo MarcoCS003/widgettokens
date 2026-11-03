@@ -8,6 +8,9 @@
   [![Zero Dependencies](https://img.shields.io/badge/Dependencies-Standard%20Library%20Only-success)]()
 
   <p>A native <b>KDE Plasma 6</b> desktop & panel widget that visualizes your AI token consumption as a <b>GitHub-style contribution heatmap (7 days x 30 weeks)</b>. Automatically tracks tokens across popular AI coding agents, operating <b>100% locally with zero cloud or external dependencies</b>.</p>
+
+  <br/>
+  <img src="assets/screenshot.png" alt="WidgetTokens Heatmap Preview" width="640" />
 </div>
 
 ---
