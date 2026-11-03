@@ -134,14 +134,36 @@ class TokenRequestHandler(BaseHTTPRequestHandler):
         logger.debug("%s - - [%s] %s", self.address_string(), self.log_date_time_string(), format % args)
 
 
+def _run_background_collector(db_path: str, machine: str = "work", interval: int = 300):
+    import time
+    from backend.collector import collect_all
+    logger.info("Starting background collector on server for [%s] (interval: %ds)...", machine, interval)
+    while True:
+        try:
+            collect_all(machine_name=machine, target_db_path=db_path)
+        except Exception as e:
+            logger.error("Error in server background collector: %s", e)
+        time.sleep(interval)
+
+
 def create_server(host: str = "0.0.0.0", port: int = 8765, db_path: Optional[str] = None) -> ThreadedHTTPServer:
     init_db(db_path)
     return ThreadedHTTPServer((host, port), TokenRequestHandler, db_path=db_path)
 
 
-def run_server(host: str = "0.0.0.0", port: int = 8765, db_path: Optional[str] = None):
+def run_server(host: str = "0.0.0.0", port: int = 8765, db_path: Optional[str] = None, machine: str = "work", auto_collect: bool = True):
     server = create_server(host=host, port=port, db_path=db_path)
     logger.info("WidgetTokens Server listening on %s:%d (DB: %s)", host, port, server.db_path)
+
+    if auto_collect:
+        import threading
+        t = threading.Thread(
+            target=_run_background_collector,
+            args=(server.db_path, machine, 300),
+            daemon=True
+        )
+        t.start()
+
     try:
         server.serve_forever()
     except KeyboardInterrupt:
@@ -155,6 +177,8 @@ if __name__ == "__main__":
     parser.add_argument("--host", default=os.getenv("WIDGETTOKENS_HOST", "0.0.0.0"), help="Host address (default 0.0.0.0)")
     parser.add_argument("--port", type=int, default=int(os.getenv("WIDGETTOKENS_PORT", "8765")), help="Port (default 8765)")
     parser.add_argument("--db", default=os.getenv("WIDGETTOKENS_DB", DEFAULT_DB_PATH), help="Path to SQLite database")
+    parser.add_argument("--machine", default=os.getenv("WIDGETTOKENS_MACHINE", "work"), help="Machine name ('work')")
+    parser.add_argument("--no-collect", action="store_true", help="Disable background local collection")
 
     args = parser.parse_args()
-    run_server(host=args.host, port=args.port, db_path=args.db)
+    run_server(host=args.host, port=args.port, db_path=args.db, machine=args.machine, auto_collect=not args.no_collect)

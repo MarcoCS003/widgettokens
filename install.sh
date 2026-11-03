@@ -19,6 +19,10 @@ case "$1" in
         mkdir -p "$SYSTEMD_USER_DIR"
         mkdir -p "$HOME/.local/share/widgettokens"
 
+        # Extraer tokens iniciales de la PC de trabajo
+        echo "[+] Extrayendo tokens locales de OpenCode y Antigravity en PC Trabajo..."
+        python3 -m backend.collector --machine work || true
+
         # Actualizar ruta en archivo de servicio
         sed "s|WorkingDirectory=.*|WorkingDirectory=$SCRIPT_DIR|g" \
             "$SCRIPT_DIR/backend/systemd/widgettokens-server.service" > "$SYSTEMD_USER_DIR/widgettokens-server.service"
@@ -28,6 +32,11 @@ case "$1" in
 
         echo "[✓] Servidor central instalado y corriendo en systemd --user."
         echo "    Verifica el estado con: systemctl --user status widgettokens-server"
+        echo "    Verifica el endpoint con: curl http://localhost:8765/health"
+        echo ""
+        echo "[i] NOTA SOBRE FIREWALL (Fedora / RHEL):"
+        echo "    Si tu PC personal no puede conectar por Tailscale, abre el puerto 8765 en esta PC con:"
+        echo "    sudo firewall-cmd --add-port=8765/tcp --permanent && sudo firewall-cmd --reload"
         ;;
 
     client)

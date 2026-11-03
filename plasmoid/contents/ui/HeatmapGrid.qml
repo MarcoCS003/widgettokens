@@ -45,22 +45,22 @@ Item {
     }
 
     // Prepare model with padding for alignment (flow: TopToBottom, rows: 7)
-    property var gridItems: {
-        if (!daysList || daysList.length === 0) return [];
+    function calculateGridItems(list) {
+        if (!list || list.length === 0) return [];
         var result = [];
-        var firstDay = daysList[0];
-        var padStart = firstDay.weekday || 0; // 0: Mon, 6: Sun
+        var firstDay = list[0];
+        var padStart = firstDay.weekday !== undefined ? firstDay.weekday : 0; // 0: Mon, 6: Sun
 
         for (var p = 0; p < padStart; p++) {
             result.push({ isPad: true });
         }
 
-        for (var i = 0; i < daysList.length; i++) {
-            var d = daysList[i];
+        for (var i = 0; i < list.length; i++) {
+            var d = list[i];
             result.push({
                 isPad: false,
-                date: d.date,
-                weekday: d.weekday,
+                date: d.date || "",
+                weekday: d.weekday || 0,
                 total_tokens: d.total_tokens || 0,
                 intensity: d.intensity || 0,
                 by_machine: d.by_machine || {},
@@ -81,6 +81,8 @@ Item {
         }
         return result;
     }
+
+    readonly property var gridItems: calculateGridItems(daysList)
 
     readonly property int columnsCount: Math.ceil(gridItems.length / 7)
 

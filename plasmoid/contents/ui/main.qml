@@ -87,41 +87,29 @@ PlasmoidItem {
 
     preferredRepresentation: inPanel ? compactRepresentation : fullRepresentation
 
+    readonly property string cacheFilePath: StandardPaths.writableLocation(StandardPaths.GenericCacheLocation) + "/plasma-tokens/history.json"
+    readonly property string readCmd: "cat " + cacheFilePath
+
     // Executable DataSource to read history JSON file
     Plasma5Support.DataSource {
         id: fileDataSource
         engine: "executable"
-        connectedSources: []
+        connectedSources: [root.readCmd]
+        interval: 15000 // Runs every 15 seconds
 
         onNewData: function(sourceName, data) {
             var stdout = data["stdout"];
             if (stdout && stdout.length > 5) {
                 try {
-                    var parsed = JSON.parse(stdout);
-                    root.historyData = parsed;
+                    root.historyData = JSON.parse(stdout);
                 } catch (e) {
                     console.warn("[WidgetTokens] JSON parse error:", e);
                 }
             }
-            disconnectSource(sourceName);
         }
     }
 
     function loadHistory() {
-        var cachePath = StandardPaths.writableLocation(StandardPaths.GenericCacheLocation) + "/plasma-tokens/history.json";
-        var cmd = "cat \"" + cachePath + "\" 2>/dev/null";
-        fileDataSource.connectSource(cmd);
-    }
-
-    Component.onCompleted: {
-        loadHistory();
-    }
-
-    Timer {
-        id: autoReloadTimer
-        interval: 30000 // 30 seconds
-        running: true
-        repeat: true
-        onTriggered: root.loadHistory()
+        fileDataSource.connectSource(root.readCmd);
     }
 }
