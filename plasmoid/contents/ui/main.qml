@@ -22,16 +22,16 @@ PlasmoidItem {
     property var historyData: ({ "summary": {}, "days": [] })
     property var daysList: (historyData && historyData.days) ? historyData.days : []
 
-    readonly property int todayTokens: {
+    readonly property double todayTokens: {
         if (historyData && historyData.summary && historyData.summary.today_tokens !== undefined) {
-            return historyData.summary.today_tokens;
+            return Number(historyData.summary.today_tokens);
         }
         return 0;
     }
 
-    readonly property int grandTotal: {
+    readonly property double grandTotal: {
         if (historyData && historyData.summary && historyData.summary.total_tokens !== undefined) {
-            return historyData.summary.total_tokens;
+            return Number(historyData.summary.total_tokens);
         }
         return 0;
     }
@@ -43,38 +43,121 @@ PlasmoidItem {
         return "Últimos 365 días";
     }
 
-    readonly property string workPercent: {
+    function formatTokens(count) {
+        if (!count || isNaN(count)) return "0";
+        var num = Number(count);
+        if (num >= 1000000000) {
+            return (num / 1000000000).toFixed(3) + " B";
+        }
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(3) + " M";
+        }
+        if (num >= 1000) {
+            var k = num / 1000;
+            return (k >= 100 ? k.toFixed(0) : k.toFixed(1)) + " k";
+        }
+        return num.toLocaleString();
+    }
+
+    function formatTokensCompact(count) {
+        if (!count || isNaN(count)) return "0";
+        var num = Number(count);
+        if (num >= 1000000000) {
+            return (num / 1000000000).toFixed(1) + "B";
+        }
+        if (num >= 1000000) {
+            return (num / 1000000).toFixed(1) + "M";
+        }
+        if (num >= 1000) {
+            return (num / 1000).toFixed(0) + "k";
+        }
+        return num.toString();
+    }
+
+    function normalizeMachine(mach) {
+        if (!mach) return "";
+        var m = mach.toString().toLowerCase().trim();
+        if (m === "personal") return "fedora";
+        if (m === "work") return "marcoijl";
+        return mach;
+    }
+
+    function machineIcon(mach) {
+        if (!mach) return "💻";
+        var m = mach.toString().toLowerCase();
+        if (m.includes("work") || m.includes("marco") || m.includes("server")) return "🖥️";
+        return "💻";
+    }
+
+    function sourceDisplayName(src) {
+        if (!src) return "";
+        if (src === "opencode") return "OpenCode";
+        if (src === "antigravity") return "Antigravity";
+        if (src === "claude") return "Claude";
+        if (src === "openclaw") return "OpenClaw";
+        return src.charAt(0).toUpperCase() + src.slice(1);
+    }
+
+    function sourceIcon(src) {
+        if (src === "opencode") return "⚡";
+        if (src === "antigravity") return "🚀";
+        if (src === "claude") return "🟣";
+        if (src === "openclaw") return "🦀";
+        return "🤖";
+    }
+
+    readonly property string computersSummaryText: {
         if (!grandTotal || !historyData.summary || !historyData.summary.by_machine) return "0%";
-        var w = historyData.summary.by_machine.work || 0;
-        return Math.round((w / grandTotal) * 100) + "%";
+        var raw = historyData.summary.by_machine;
+        var aggregated = {};
+        for (var k in raw) {
+            var norm = normalizeMachine(k);
+            aggregated[norm] = (aggregated[norm] || 0) + (raw[k] || 0);
+        }
+        var parts = [];
+        for (var m in aggregated) {
+            var val = aggregated[m];
+            if (val > 0) {
+                var pct = Math.round((val / grandTotal) * 100);
+                parts.push(machineIcon(m) + " " + m + " " + pct + "%");
+            }
+        }
+        return parts.length > 0 ? parts.join("  |  ") : "0%";
     }
 
-    readonly property string personalPercent: {
-        if (!grandTotal || !historyData.summary || !historyData.summary.by_machine) return "0%";
-        var p = historyData.summary.by_machine.personal || 0;
-        return Math.round((p / grandTotal) * 100) + "%";
-    }
-
-    readonly property string opencodePercent: {
-        if (!grandTotal || !historyData.summary || !historyData.summary.by_source) return "0%";
-        var oc = historyData.summary.by_source.opencode || 0;
-        return Math.round((oc / grandTotal) * 100) + "%";
-    }
-
-    readonly property string antigravityPercent: {
-        if (!grandTotal || !historyData.summary || !historyData.summary.by_source) return "0%";
-        var ag = historyData.summary.by_source.antigravity || 0;
-        return Math.round((ag / grandTotal) * 100) + "%";
-    }
-
-    toolTipMainText: "Tokens IA: " + todayTokens.toLocaleString() + " hoy"
+    toolTipMainText: "Tokens IA: " + formatTokens(todayTokens) + " hoy"
     toolTipSubText: {
         var summary = (historyData && historyData.summary) ? historyData.summary : {};
         var byMach = summary.by_machine || {};
         var bySrc = summary.by_source || {};
-        return "Anual: " + grandTotal.toLocaleString() + "\n" +
-               "💼 Trabajo: " + (byMach.work || 0).toLocaleString() + " | 💻 Personal: " + (byMach.personal || 0).toLocaleString() + "\n" +
-               "⚡ OpenCode: " + (bySrc.opencode || 0).toLocaleString() + " | 🚀 Antigravity: " + (bySrc.antigravity || 0).toLocaleString();
+
+        var machParts = [];
+        var normMach = {};
+        for (var mk in byMach) {
+            var nm = normalizeMachine(mk);
+            normMach[nm] = (normMach[nm] || 0) + (byMach[mk] || 0);
+        }
+        for (var m in normMach) {
+            if (normMach[m] > 0) {
+                machParts.push(machineIcon(m) + " " + m + ": " + formatTokens(normMach[m]));
+            }
+        }
+
+        var srcParts = [];
+        for (var s in bySrc) {
+            if (bySrc[s] > 0) {
+                srcParts.push(sourceIcon(s) + " " + sourceDisplayName(s) + ": " + formatTokens(bySrc[s]));
+            }
+        }
+
+        var text = "Anual: " + formatTokens(grandTotal);
+        if (machParts.length > 0) {
+            text += "\n" + machParts.join("  |  ");
+        }
+        if (srcParts.length > 0) {
+            text += "\n" + srcParts.join("  |  ");
+        }
+        return text;
     }
 
     compactRepresentation: CompactRepresentation {
@@ -98,7 +181,7 @@ PlasmoidItem {
         id: fileDataSource
         engine: "executable"
         connectedSources: [root.readCmd]
-        interval: 15000 // Runs every 15 seconds
+        interval: 10000 // Runs every 10 seconds
 
         onNewData: function(sourceName, data) {
             var stdout = data["stdout"];

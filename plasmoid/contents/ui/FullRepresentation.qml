@@ -8,17 +8,17 @@ Item {
 
     required property var plasmoidItem
 
-    Layout.minimumWidth: 780
-    Layout.minimumHeight: 330
-    Layout.preferredWidth: 800
-    Layout.preferredHeight: 350
+    Layout.minimumWidth: 520
+    Layout.minimumHeight: 240
+    Layout.preferredWidth: 680
+    Layout.preferredHeight: 275
 
     readonly property color borderColor: Qt.rgba(Kirigami.Theme.textColor.r, Kirigami.Theme.textColor.g, Kirigami.Theme.textColor.b, 0.18)
 
     ColumnLayout {
         anchors.fill: parent
-        anchors.margins: Kirigami.Units.largeSpacing
-        spacing: Kirigami.Units.mediumSpacing
+        anchors.margins: Kirigami.Units.smallSpacing * 1.5
+        spacing: Kirigami.Units.smallSpacing
 
         // --- Header ---
         RowLayout {
@@ -27,8 +27,8 @@ Item {
 
             Kirigami.Icon {
                 source: "view-calendar-timeline"
-                Layout.preferredWidth: Kirigami.Units.iconSizes.medium
-                Layout.preferredHeight: Kirigami.Units.iconSizes.medium
+                Layout.preferredWidth: Kirigami.Units.iconSizes.smallMedium
+                Layout.preferredHeight: Kirigami.Units.iconSizes.smallMedium
             }
 
             ColumnLayout {
@@ -36,11 +36,11 @@ Item {
                 QQC2.Label {
                     text: "Consumo de Tokens IA"
                     font.bold: true
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.2
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
                 }
                 QQC2.Label {
                     text: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.rangeText : ""
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.85
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.80
                     color: Kirigami.Theme.disabledTextColor
                 }
             }
@@ -50,6 +50,7 @@ Item {
             QQC2.Button {
                 icon.name: "view-refresh"
                 text: "Actualizar"
+                font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.85
                 onClicked: {
                     if (fullRoot.plasmoidItem) {
                         fullRoot.plasmoidItem.loadHistory();
@@ -58,15 +59,15 @@ Item {
             }
         }
 
-        // --- Metric Cards ---
+        // --- Metric Cards (Compact: 3 Cards) ---
         RowLayout {
             Layout.fillWidth: true
-            spacing: Kirigami.Units.mediumSpacing
+            spacing: Kirigami.Units.smallSpacing
 
             // Card 1: Hoy
             Rectangle {
                 Layout.fillWidth: true
-                height: 56
+                height: 48
                 radius: 4
                 color: Kirigami.Theme.alternateBackgroundColor
                 border.width: 1
@@ -74,18 +75,18 @@ Item {
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    spacing: 2
+                    spacing: 1
                     QQC2.Label {
                         text: "Hoy"
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.78
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.75
                         color: Kirigami.Theme.disabledTextColor
                         Layout.alignment: Qt.AlignHCenter
                     }
                     QQC2.Label {
-                        text: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.todayTokens.toLocaleString() : "0"
+                        text: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.formatTokens(fullRoot.plasmoidItem.todayTokens) : "0"
                         font.bold: true
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.15
-                        color: Kirigami.Theme.positiveTextColor
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
+                        color: fullRoot.plasmoidItem && fullRoot.plasmoidItem.todayTokens > 0 ? "#58a6ff" : Kirigami.Theme.disabledTextColor
                         Layout.alignment: Qt.AlignHCenter
                     }
                 }
@@ -94,7 +95,7 @@ Item {
             // Card 2: Total 365 días
             Rectangle {
                 Layout.fillWidth: true
-                height: 56
+                height: 48
                 radius: 4
                 color: Kirigami.Theme.alternateBackgroundColor
                 border.width: 1
@@ -102,27 +103,27 @@ Item {
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    spacing: 2
+                    spacing: 1
                     QQC2.Label {
                         text: "Total Anual"
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.78
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.75
                         color: Kirigami.Theme.disabledTextColor
                         Layout.alignment: Qt.AlignHCenter
                     }
                     QQC2.Label {
-                        text: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.grandTotal.toLocaleString() : "0"
+                        text: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.formatTokens(fullRoot.plasmoidItem.grandTotal) : "0"
                         font.bold: true
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.15
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 1.1
                         color: Kirigami.Theme.textColor
                         Layout.alignment: Qt.AlignHCenter
                     }
                 }
             }
 
-            // Card 3: Por Máquina
+            // Card 3: Por Computadora
             Rectangle {
                 Layout.fillWidth: true
-                height: 56
+                height: 48
                 radius: 4
                 color: Kirigami.Theme.alternateBackgroundColor
                 border.width: 1
@@ -130,46 +131,17 @@ Item {
 
                 ColumnLayout {
                     anchors.centerIn: parent
-                    spacing: 2
+                    spacing: 1
                     QQC2.Label {
-                        text: "Por Máquina"
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.78
+                        text: "Por Computadora"
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.75
                         color: Kirigami.Theme.disabledTextColor
                         Layout.alignment: Qt.AlignHCenter
                     }
                     QQC2.Label {
-                        text: "💼 " + (fullRoot.plasmoidItem ? fullRoot.plasmoidItem.workPercent : "0%") +
-                              "  |  💻 " + (fullRoot.plasmoidItem ? fullRoot.plasmoidItem.personalPercent : "0%")
+                        text: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.computersSummaryText : "0%"
                         font.bold: true
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.95
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-                }
-            }
-
-            // Card 4: Por Herramienta
-            Rectangle {
-                Layout.fillWidth: true
-                height: 56
-                radius: 4
-                color: Kirigami.Theme.alternateBackgroundColor
-                border.width: 1
-                border.color: fullRoot.borderColor
-
-                ColumnLayout {
-                    anchors.centerIn: parent
-                    spacing: 2
-                    QQC2.Label {
-                        text: "Por Herramienta"
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.78
-                        color: Kirigami.Theme.disabledTextColor
-                        Layout.alignment: Qt.AlignHCenter
-                    }
-                    QQC2.Label {
-                        text: "⚡ " + (fullRoot.plasmoidItem ? fullRoot.plasmoidItem.opencodePercent : "0%") +
-                              "  |  🚀 " + (fullRoot.plasmoidItem ? fullRoot.plasmoidItem.antigravityPercent : "0%")
-                        font.bold: true
-                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.95
+                        font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.90
                         Layout.alignment: Qt.AlignHCenter
                     }
                 }
@@ -179,7 +151,7 @@ Item {
         // --- Heatmap Annual Matrix (7 x 52) ---
         Rectangle {
             Layout.fillWidth: true
-            Layout.preferredHeight: 120
+            Layout.preferredHeight: 102
             color: Kirigami.Theme.backgroundColor
             radius: 4
             border.width: 1
@@ -187,6 +159,7 @@ Item {
 
             HeatmapGrid {
                 id: heatmap
+                plasmoidItem: fullRoot.plasmoidItem
                 anchors.centerIn: parent
                 daysList: fullRoot.plasmoidItem ? fullRoot.plasmoidItem.daysList : []
             }
@@ -204,29 +177,39 @@ Item {
                     var h = heatmap.hoveredDay;
                     if (h) {
                         var dt = h.date || "";
-                        var tot = (h.total_tokens || 0).toLocaleString();
-                        var work = ((h.by_machine && h.by_machine.work) || 0).toLocaleString();
-                        var pers = ((h.by_machine && h.by_machine.personal) || 0).toLocaleString();
-                        var oc = ((h.by_source && h.by_source.opencode) || 0).toLocaleString();
-                        var ag = ((h.by_source && h.by_source.antigravity) || 0).toLocaleString();
-                        return dt + "  •  " + tot + " tokens [💼 " + work + " | 💻 " + pers + "] [⚡ " + oc + " | 🚀 " + ag + "]";
+                        var tot = h.total_tokens || 0;
+                        if (tot === 0) {
+                            return dt + "  •  Sin actividad";
+                        }
+                        var totStr = (fullRoot.plasmoidItem ? fullRoot.plasmoidItem.formatTokens(tot) : tot) + " tokens";
+                        var machText = heatmap.getActiveMachinesText(h.by_machine);
+                        var srcText = heatmap.getActiveSourcesText(h.by_source);
+
+                        var res = dt + "  •  " + totStr;
+                        if (machText.length > 0) {
+                            res += "  [" + machText + "]";
+                        }
+                        if (srcText.length > 0) {
+                            res += "  [" + srcText + "]";
+                        }
+                        return res;
                     }
-                    return "Pasa el mouse sobre cualquier celda para inspeccionar el detalle diario.";
+                    return "Pasa el cursor sobre una celda para ver el detalle diario.";
                 }
-                font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.85
+                font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.80
                 color: heatmap.hoveredDay ? Kirigami.Theme.textColor : Kirigami.Theme.disabledTextColor
                 Layout.fillWidth: true
                 elide: Text.ElideRight
             }
 
-            // Legend
+            // Legend (Blue shades)
             Row {
-                spacing: 3
+                spacing: 2
                 Layout.alignment: Qt.AlignRight
 
                 QQC2.Label {
                     text: "Menos "
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.75
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.72
                     color: Kirigami.Theme.disabledTextColor
                     anchors.verticalCenter: parent.verticalCenter
                 }
@@ -234,8 +217,8 @@ Item {
                 Repeater {
                     model: [0, 1, 2, 3, 4]
                     Rectangle {
-                        width: 10
-                        height: 10
+                        width: 9
+                        height: 9
                         radius: 2
                         color: heatmap.getCellColor(modelData)
                         border.width: 1
@@ -245,7 +228,7 @@ Item {
 
                 QQC2.Label {
                     text: " Más"
-                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.75
+                    font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.72
                     color: Kirigami.Theme.disabledTextColor
                     anchors.verticalCenter: parent.verticalCenter
                 }

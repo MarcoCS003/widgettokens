@@ -19,9 +19,9 @@ case "$1" in
         mkdir -p "$SYSTEMD_USER_DIR"
         mkdir -p "$HOME/.local/share/widgettokens"
 
-        # Extraer tokens iniciales de la PC de trabajo
-        echo "[+] Extrayendo tokens locales de OpenCode y Antigravity en PC Trabajo..."
-        python3 -m backend.collector --machine work || true
+        # Extraer tokens iniciales de la PC
+        echo "[+] Extrayendo tokens locales (OpenCode, Antigravity, Claude Code, OpenClaw)..."
+        python3 -m backend.collector || true
 
         # Actualizar ruta en archivo de servicio
         sed "s|WorkingDirectory=.*|WorkingDirectory=$SCRIPT_DIR|g" \
@@ -63,7 +63,7 @@ case "$1" in
 
         # Ejecutar sincronización inicial offline/online
         echo "[+] Ejecutando primera sincronización y extracción local..."
-        python3 -m backend.syncer --once --machine personal || true
+        python3 -m backend.syncer --once || true
 
         echo "[✓] Cliente y Plasmoid instalados con éxito."
         echo "    Puedes probar el widget con: plasmawindowed org.kde.plasma.tokens"

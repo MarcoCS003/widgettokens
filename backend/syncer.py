@@ -2,6 +2,7 @@ import os
 import sys
 import json
 import time
+import socket
 import argparse
 import logging
 from urllib.request import Request, urlopen
@@ -26,6 +27,10 @@ DEFAULT_SERVER_URL = "http://100.121.178.86:8765"
 logger = logging.getLogger("widgettokens.syncer")
 
 
+def get_default_machine() -> str:
+    return os.getenv("WIDGETTOKENS_MACHINE") or socket.gethostname()
+
+
 def _atomic_write_json(file_path: str, data: dict) -> None:
     os.makedirs(os.path.dirname(os.path.abspath(file_path)), exist_ok=True)
     temp_path = f"{file_path}.tmp.{os.getpid()}"
@@ -38,7 +43,7 @@ def sync_cycle(
     server_url: str = DEFAULT_SERVER_URL,
     client_db_path: Optional[str] = None,
     cache_file_path: str = DEFAULT_CACHE_PATH,
-    machine_name: str = "personal",
+    machine_name: Optional[str] = None,
     skip_collection: bool = False
 ) -> bool:
     """
@@ -50,21 +55,22 @@ def sync_cycle(
     5. Gracefully falls back if server is unreachable (offline mode).
     """
     init_db(client_db_path)
+    mach = machine_name or get_default_machine()
 
     if not skip_collection:
         try:
-            collect_all(machine_name=machine_name, target_db_path=client_db_path)
+            collect_all(machine_name=mach, target_db_path=client_db_path)
         except Exception as e:
             logger.warning("Local collection encountered an error: %s", e)
 
     server_base = server_url.rstrip("/")
-    sync_state_key = f"{machine_name}_last_synced_timestamp"
+    sync_state_key = f"{mach}_last_synced_timestamp"
     last_synced_ts = get_state(sync_state_key, client_db_path) or "1970-01-01T00:00:00Z"
 
     # Query local deltas to send to central server
     deltas = get_events_delta(
         since_timestamp=last_synced_ts,
-        machine=machine_name,
+        machine=mach,
         db_path=client_db_path
     )
 
@@ -72,7 +78,7 @@ def sync_cycle(
     try:
         if deltas:
             payload = {
-                "machine": machine_name,
+                "machine": mach,
                 "events": deltas
             }
             body_bytes = json.dumps(payload).encode("utf-8")
@@ -83,7 +89,7 @@ def sync_cycle(
             )
             with urlopen(req, timeout=10) as resp:
                 if resp.status == 200:
-                    logger.info("Sent %d deltas to server successfully", len(deltas))
+                    logger.info("Sent %d deltas from [%s] to server successfully", len(deltas), mach)
                     # Update watermark timestamp to the newest event sent
                     newest_ts = max(d["timestamp"] for d in deltas)
                     set_state(sync_state_key, newest_ts, client_db_path)
@@ -117,17 +123,18 @@ def run_syncer_loop(
     server_url: str = DEFAULT_SERVER_URL,
     client_db_path: Optional[str] = None,
     cache_file_path: str = DEFAULT_CACHE_PATH,
-    machine_name: str = "personal",
+    machine_name: Optional[str] = None,
     interval: int = 300
 ) -> None:
-    logger.info("Starting WidgetTokens Syncer (Server: %s, Interval: %ds, Machine: %s)", server_url, interval, machine_name)
+    mach = machine_name or get_default_machine()
+    logger.info("Starting WidgetTokens Syncer (Server: %s, Interval: %ds, Machine: %s)", server_url, interval, mach)
     while True:
         try:
             sync_cycle(
                 server_url=server_url,
                 client_db_path=client_db_path,
                 cache_file_path=cache_file_path,
-                machine_name=machine_name
+                machine_name=mach
             )
         except Exception as e:
             logger.error("Unexpected error in syncer loop: %s", e)
@@ -138,7 +145,7 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO, format="[%(asctime)s] %(levelname)s: %(message)s")
     parser = argparse.ArgumentParser(description="WidgetTokens Syncer Client")
     parser.add_argument("--server", default=os.getenv("WIDGETTOKENS_SERVER_URL", DEFAULT_SERVER_URL), help="Central Server URL (Tailscale IP:Port)")
-    parser.add_argument("--machine", default=os.getenv("WIDGETTOKENS_MACHINE", "personal"), help="Machine name ('personal' or 'work')")
+    parser.add_argument("--machine", default=get_default_machine(), help="Machine name")
     parser.add_argument("--db", default=os.getenv("WIDGETTOKENS_DB", DEFAULT_DB_PATH), help="Local SQLite DB path")
     parser.add_argument("--cache", default=os.getenv("WIDGETTOKENS_CACHE", DEFAULT_CACHE_PATH), help="Plasmoid cache JSON path")
     parser.add_argument("--interval", type=int, default=int(os.getenv("WIDGETTOKENS_INTERVAL", "300")), help="Sync interval in seconds")

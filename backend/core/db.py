@@ -177,7 +177,6 @@ def get_aggregated_matrix(
     curr = start_date
     while curr <= today:
         d_str = curr.strftime("%Y-%m-%d")
-        # weekday: 0 = Monday, 6 = Sunday (or 0 = Sunday if needed, ISO is 0=Mon, 6=Sun)
         day_map[d_str] = {
             "date": d_str,
             "weekday": curr.weekday(),  # 0: Mon, 6: Sun
@@ -185,17 +184,14 @@ def get_aggregated_matrix(
             "input_tokens": 0,
             "output_tokens": 0,
             "cache_tokens": 0,
-            "by_machine": {
-                "work": 0,
-                "personal": 0,
-            },
-            "by_source": {
-                "opencode": 0,
-                "antigravity": 0,
-            },
+            "by_machine": {},
+            "by_source": {},
             "intensity": 0,
         }
         curr += timedelta(days=1)
+
+    summary_by_machine: Dict[str, int] = {}
+    summary_by_source: Dict[str, int] = {}
 
     for r in rows:
         d_str = r["date"]
@@ -216,6 +212,9 @@ def get_aggregated_matrix(
 
         day_data["by_machine"][m] = day_data["by_machine"].get(m, 0) + tot
         day_data["by_source"][s] = day_data["by_source"].get(s, 0) + tot
+
+        summary_by_machine[m] = summary_by_machine.get(m, 0) + tot
+        summary_by_source[s] = summary_by_source.get(s, 0) + tot
 
     all_days = list(day_map.values())
 
@@ -244,10 +243,6 @@ def get_aggregated_matrix(
             d["intensity"] = 4
 
     grand_total = sum(d["total_tokens"] for d in all_days)
-    work_total = sum(d["by_machine"].get("work", 0) for d in all_days)
-    personal_total = sum(d["by_machine"].get("personal", 0) for d in all_days)
-    opencode_total = sum(d["by_source"].get("opencode", 0) for d in all_days)
-    antigravity_total = sum(d["by_source"].get("antigravity", 0) for d in all_days)
     today_data = day_map.get(end_str, {})
     today_total = today_data.get("total_tokens", 0)
 
@@ -257,14 +252,8 @@ def get_aggregated_matrix(
         "days_count": len(all_days),
         "total_tokens": grand_total,
         "today_tokens": today_total,
-        "by_machine": {
-            "work": work_total,
-            "personal": personal_total
-        },
-        "by_source": {
-            "opencode": opencode_total,
-            "antigravity": antigravity_total
-        },
+        "by_machine": summary_by_machine,
+        "by_source": summary_by_source,
         "quantiles": {
             "q1": q1,
             "q2": q2,

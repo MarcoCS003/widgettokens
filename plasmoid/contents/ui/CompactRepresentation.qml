@@ -30,18 +30,10 @@ Item {
 
         QQC2.Label {
             id: tokenLabel
-            text: {
-                var count = compactRoot.plasmoidItem ? compactRoot.plasmoidItem.todayTokens : 0;
-                if (count >= 1000000) {
-                    return (count / 1000000).toFixed(1) + "M";
-                } else if (count >= 1000) {
-                    return (count / 1000).toFixed(1) + "k";
-                }
-                return count.toString();
-            }
+            text: compactRoot.plasmoidItem ? compactRoot.plasmoidItem.formatTokensCompact(compactRoot.plasmoidItem.todayTokens) : "0"
             font.bold: true
             font.pointSize: Kirigami.Theme.defaultFont.pointSize * 0.95
-            color: Kirigami.Theme.textColor
+            color: Kirigami.Theme.highlightColor
         }
     }
 

@@ -173,11 +173,12 @@ def run_server(host: str = "0.0.0.0", port: int = 8765, db_path: Optional[str] =
 
 
 if __name__ == "__main__":
+    import socket
     parser = argparse.ArgumentParser(description="WidgetTokens Central Server (Tailscale)")
     parser.add_argument("--host", default=os.getenv("WIDGETTOKENS_HOST", "0.0.0.0"), help="Host address (default 0.0.0.0)")
     parser.add_argument("--port", type=int, default=int(os.getenv("WIDGETTOKENS_PORT", "8765")), help="Port (default 8765)")
     parser.add_argument("--db", default=os.getenv("WIDGETTOKENS_DB", DEFAULT_DB_PATH), help="Path to SQLite database")
-    parser.add_argument("--machine", default=os.getenv("WIDGETTOKENS_MACHINE", "work"), help="Machine name ('work')")
+    parser.add_argument("--machine", default=os.getenv("WIDGETTOKENS_MACHINE") or socket.gethostname(), help="Machine name")
     parser.add_argument("--no-collect", action="store_true", help="Disable background local collection")
 
     args = parser.parse_args()
